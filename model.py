@@ -119,7 +119,7 @@ st.set_page_config(page_title="พยากรณ์น้ำฝน", layout="wi
 # ---------- โลโก้ ----------
 # ---------- Header + โลโก้ ----------
 logo_path = os.path.join(
-    "Data-Rainfall-ชุดสอง", "Dataของจริง", "logo.png.jpg"
+    ""C:\Users\KanchanasudP\OneDrive - Mitr Phol Sugar Corp., Ltd\Documents\code-forecast-rainfall\Data-Rainfall-ชุดสอง\Dataของจริง\logo.png.jpg""
 )
 
 c1, c2 = st.columns([1, 6])
@@ -210,3 +210,4 @@ st.download_button(
     export_excel(table),
     file_name=f"Rainfall_Forecast_{factory}_{year+543}.xlsx"
 )
+
