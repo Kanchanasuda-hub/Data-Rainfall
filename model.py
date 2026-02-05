@@ -88,7 +88,7 @@ def forecast_with_confidence(y, steps):
     mean = fc.predicted_mean.clip(lower=0)
 
     # ---------- ความเชื่อมั่น ----------
-    if len(y) >= 24:
+    if len(y) >= 36:
         train = y[:-12]
         test = y[-12:]
         pred = res.predict(start=test.index[0], end=test.index[-1]).clip(lower=0)
@@ -207,4 +207,5 @@ st.download_button(
     export_excel(table),
     file_name=f"Rainfall_Forecast_{factory}_{year+543}.xlsx"
 )
+
 
