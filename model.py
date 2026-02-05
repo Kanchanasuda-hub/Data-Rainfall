@@ -118,22 +118,19 @@ st.set_page_config(page_title="พยากรณ์น้ำฝน", layout="wi
 
 # ---------- โลโก้ ----------
 # ---------- Header + โลโก้ ----------
-logo_path = os.path.join(
-    "Data-Rainfall-ชุดสอง", "Dataของจริง", "logo.png.jpg"
-)
+# ---------- Header + โลโก้ ----------
+logo_url = "https://raw.githubusercontent.com/Kanchanasuda-hub/Data-Rainfall/7ed2cf8806a54c62c7cbbbd802077b68ae125f64/logo.png.jpg"
 
 c1, c2 = st.columns([1, 6])
 
 with c1:
-    if os.path.exists(logo_path):
-        st.image(logo_path, width=120)
+    st.image(logo_url, width=120)
 
 with c2:
     st.markdown(
         """
         <div style='display:flex; flex-direction:column; justify-content:center; height:120px;'>
             <h2 style='margin:0;'> พยากรณ์น้ำฝนรายโรงงานและเขตส่งเสริม</h2>
-            
         </div>
         """,
         unsafe_allow_html=True
@@ -210,3 +207,4 @@ st.download_button(
     export_excel(table),
     file_name=f"Rainfall_Forecast_{factory}_{year+543}.xlsx"
 )
+
