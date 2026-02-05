@@ -89,15 +89,43 @@ def forecast_with_confidence(y, steps):
 
     # ---------- ความเชื่อมั่น ----------
     if len(y) >= 36:
-        train = y[:-12]
-        test = y[-12:]
-        pred = res.predict(start=test.index[0], end=test.index[-1]).clip(lower=0)
-        rmse = np.sqrt(mean_squared_error(test, pred))
-        conf = max(0, 100 - (rmse / (y.mean()+1e-6)) * 100)
-    else:
-        conf = 75  # default ถ้าข้อมูลสั้น
+    train = y[:-12]
+    test = y[-12:]
 
-    return mean, round(conf, 1)
+    pred = res.predict(
+        start=test.index[0],
+        end=test.index[-1]
+    ).clip(lower=0)
+
+    rmse = np.sqrt(mean_squared_error(test, pred))
+
+    # 1) Normalize RMSE
+    nrmse = rmse / (y.max() - y.min() + 1e-6)
+
+    # 2) Base confidence (ลดช้าลง)
+    base_conf = 100 * np.exp(-nrmse * 1.5)
+
+    # 3) Bonus ข้อมูลย้อนหลัง
+    data_bonus = 10 if len(y) >= 60 else (len(y) / 60 * 10)
+
+    # 4) โทษ volatility (เบาลง)
+    volatility_penalty = min(
+        y.std() / (y.mean() + 1e-6) * 6, 6
+    )
+
+    conf = base_conf + data_bonus - volatility_penalty
+
+    # 5) ตั้งกรอบใหม่
+    if len(y) >= 60:
+        conf = np.clip(conf, 75, 95)
+    else:
+        conf = np.clip(conf, 60, 90)
+
+else:
+    conf = 75
+
+return mean, round(conf, 1)
+
 
 
 # ==================================================
@@ -207,6 +235,7 @@ st.download_button(
     export_excel(table),
     file_name=f"Rainfall_Forecast_{factory}_{year+543}.xlsx"
 )
+
 
 
 
