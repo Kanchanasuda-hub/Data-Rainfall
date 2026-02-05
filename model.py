@@ -95,7 +95,7 @@ def forecast_with_confidence(y, steps):
         rmse = np.sqrt(mean_squared_error(test, pred))
         conf = max(0, 100 - (rmse / (y.mean()+1e-6)) * 100)
     else:
-        conf = 60  # default ถ้าข้อมูลสั้น
+        conf = 75  # default ถ้าข้อมูลสั้น
 
     return mean, round(conf, 1)
 
@@ -207,5 +207,6 @@ st.download_button(
     export_excel(table),
     file_name=f"Rainfall_Forecast_{factory}_{year+543}.xlsx"
 )
+
 
 
