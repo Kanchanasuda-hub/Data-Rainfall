@@ -5,7 +5,7 @@ import pandas as pd
 import streamlit as st
 import plotly.graph_objects as go
 from statsmodels.tsa.statespace.sarimax import SARIMAX
-from sklearn.metrics import mean_absolute_error, mean_squared_error
+from sklearn.metrics import mean_squared_error
 
 
 # ==================================================
@@ -17,7 +17,7 @@ THAI_MONTH = [
     "กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"
 ]
 
-def thai_month(m): 
+def thai_month(m):
     return THAI_MONTH[m-1]
 
 def season_name(m):
@@ -41,6 +41,7 @@ def interpret_rain(mm):
 # เตรียมข้อมูล
 # ==================================================
 def prepare_data(file):
+
     df = pd.read_excel(file)
     df.columns = [c.strip() for c in df.columns]
 
@@ -75,6 +76,7 @@ def monthly_by_district(df):
 # โมเดล + ความเชื่อมั่น
 # ==================================================
 def forecast_with_confidence(y, steps):
+
     model = SARIMAX(
         y,
         order=(1,1,1),
@@ -87,45 +89,45 @@ def forecast_with_confidence(y, steps):
     fc = res.get_forecast(steps)
     mean = fc.predicted_mean.clip(lower=0)
 
-    # ---------- ความเชื่อมั่น ----------
+    # ---------- คำนวณ Confidence ----------
     if len(y) >= 36:
-    train = y[:-12]
-    test = y[-12:]
 
-    pred = res.predict(
-        start=test.index[0],
-        end=test.index[-1]
-    ).clip(lower=0)
+        train = y[:-12]
+        test = y[-12:]
 
-    rmse = np.sqrt(mean_squared_error(test, pred))
+        pred = res.predict(
+            start=test.index[0],
+            end=test.index[-1]
+        ).clip(lower=0)
 
-    # 1) Normalize RMSE
-    nrmse = rmse / (y.max() - y.min() + 1e-6)
+        rmse = np.sqrt(mean_squared_error(test, pred))
 
-    # 2) Base confidence (ลดช้าลง)
-    base_conf = 100 * np.exp(-nrmse * 1.5)
+        # 1) Normalize RMSE
+        nrmse = rmse / (y.max() - y.min() + 1e-6)
 
-    # 3) Bonus ข้อมูลย้อนหลัง
-    data_bonus = 10 if len(y) >= 60 else (len(y) / 60 * 10)
+        # 2) Base confidence
+        base_conf = 100 * np.exp(-nrmse * 1.5)
 
-    # 4) โทษ volatility (เบาลง)
-    volatility_penalty = min(
-        y.std() / (y.mean() + 1e-6) * 6, 6
-    )
+        # 3) Bonus จากปริมาณข้อมูล
+        data_bonus = 10 if len(y) >= 60 else (len(y) / 60 * 10)
 
-    conf = base_conf + data_bonus - volatility_penalty
+        # 4) หักความผันผวน
+        volatility_penalty = min(
+            y.std() / (y.mean() + 1e-6) * 6, 6
+        )
 
-    # 5) ตั้งกรอบใหม่
-    if len(y) >= 60:
-        conf = np.clip(conf, 75, 95)
+        conf = base_conf + data_bonus - volatility_penalty
+
+        # 5) กรอบสุดท้าย
+        if len(y) >= 60:
+            conf = np.clip(conf, 75, 95)
+        else:
+            conf = np.clip(conf, 60, 90)
+
     else:
-        conf = np.clip(conf, 60, 90)
+        conf = 75
 
-else:
-    conf = 75
-
-return mean, round(conf, 1)
-
+    return mean, round(conf, 1)
 
 
 # ==================================================
@@ -144,9 +146,6 @@ def export_excel(df):
 # ==================================================
 st.set_page_config(page_title="พยากรณ์น้ำฝน", layout="wide")
 
-# ---------- โลโก้ ----------
-# ---------- Header + โลโก้ ----------
-# ---------- Header + โลโก้ ----------
 logo_url = "https://raw.githubusercontent.com/Kanchanasuda-hub/Data-Rainfall/7ed2cf8806a54c62c7cbbbd802077b68ae125f64/logo.png.jpg"
 
 c1, c2 = st.columns([1, 6])
@@ -211,11 +210,13 @@ fig.add_trace(go.Scatter(
     mode="lines+markers",
     name="Forecast"
 ))
+
 fig.update_layout(
     title=f"พยากรณ์น้ำฝน ปี {year+543}",
     xaxis_title="เดือน",
     yaxis_title="ปริมาณฝน (มม.)"
 )
+
 st.plotly_chart(fig, width="stretch")
 
 # ---------- ตาราง ----------
@@ -235,6 +236,8 @@ st.download_button(
     export_excel(table),
     file_name=f"Rainfall_Forecast_{factory}_{year+543}.xlsx"
 )
+
+
 
 
 
