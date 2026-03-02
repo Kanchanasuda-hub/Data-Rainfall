@@ -1,5 +1,5 @@
 # 🌧 Data&Code-Rainfall Forecast 
-## ลิงค์เข้าเว็บทำนาย : https://data-rainfall-o2v8hnoappkyeoskcnm3fpy.streamlit.app/
+## ลิงค์เข้าเว็บทำนาย : https://data-rainfall-gajkvgtc6yqvlwgj9lnq4a.streamlit.app/
 
 -----------------------------------------------------------------------------------
 
